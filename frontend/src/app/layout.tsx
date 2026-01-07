@@ -61,7 +61,7 @@ function Navigation() {
               Price Impact
             </Link>
             <a
-              href="http://localhost:8000/api/docs"
+              href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/docs`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-slate-700 hover:text-blue-600 font-medium transition"

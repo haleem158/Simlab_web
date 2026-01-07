@@ -144,8 +144,7 @@ export default function VestingSimulator() {
 
     try {
       const data = watch();
-      const response = await fetch(`http://localhost:8000/api/v1/vesting/profiles?name=${encodeURIComponent(profileName)}`, {
-        method: 'POST',
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/vesting/profiles?name=${encodeURIComponent(profileName)}`, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -186,7 +185,7 @@ export default function VestingSimulator() {
     if (!confirm('Are you sure you want to delete this profile?')) return;
 
     try {
-      await fetch(`http://localhost:8000/api/v1/vesting/profiles/${profileId}`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/vesting/profiles/${profileId}`, {
         method: 'DELETE'
       });
       loadProfiles();

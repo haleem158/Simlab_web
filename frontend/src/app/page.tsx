@@ -559,7 +559,7 @@ function Footer() {
             <a href="https://github.com" className="hover:text-white transition-colors">
               <Github className="w-5 h-5" />
             </a>
-            <a href="http://localhost:8000/api/docs" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors text-sm">
+            <a href= {`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/docs`} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors text-sm">
               API Docs
             </a>
             <a href="#" className="hover:text-white transition-colors text-sm">
