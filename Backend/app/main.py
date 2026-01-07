@@ -15,9 +15,9 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "https://simlab-web.vercel.app",
+        "https://*.vercel.app",
         "http://localhost:3000",
-        "https://*.vercel.app",  # Allow all Vercel preview deployments
-        "https://simlab.vercel.app",  # Your production domain (update this)
     ],
     allow_credentials=True,
     allow_methods=["*"],
