@@ -144,16 +144,19 @@ export default function VestingSimulator() {
 
     try {
       const data = watch();
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/vesting/profiles?name=${encodeURIComponent(profileName)}`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    
+      const response = await fetch(`${apiUrl}/api/v1/vesting/profiles?name=${encodeURIComponent(profileName)}`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data)
       });
-      
+    
       if (response.ok) {
-        alert('Profile saved successfully!');
-        loadProfiles();
+       alert('Profile saved successfully!');
+       loadProfiles();
       } else {
         const errorData = await response.json();
         setError(errorData.detail || 'Failed to save profile');
