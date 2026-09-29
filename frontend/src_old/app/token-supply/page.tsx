@@ -8,6 +8,7 @@ import { Play, Download, Loader2, Info, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import apiClient from '@/lib/api';
 import type { TokenSupplyParams, TokenSupplyResponse, MonteCarloResponse } from '@/lib/types';
+import { CertifyButton } from '@/components/CertifyButton';
 
 export default function TokenSupplySimulator() {
   const [isLoading, setIsLoading] = useState(false);
@@ -368,6 +369,16 @@ export default function TokenSupplySimulator() {
                 </div>
 
                 {/* Charts */}
+                <CertifyButton
+                  projectName="My Project"
+                  simulationType="token-supply"
+                  inputs={results.summary}
+                  survivalScore={Math.round(
+                    Math.min(100, Math.max(0,
+                      100 - (results.summary.final_burned / results.summary.final_circulating) * 50
+                    ))
+                  )}
+                />
                 <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="text-lg font-semibold text-white">Supply Dynamics</h3>
