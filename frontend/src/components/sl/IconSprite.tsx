@@ -144,6 +144,9 @@ export function IconSprite() {
       <symbol id="i-wallet" viewBox="0 0 24 24">
         <path d="M20 8V6a2 2 0 00-2-2H6a2 2 0 000 4h14v12H6a2 2 0 01-2-2V6M16 14h.01" />
       </symbol>
+      <symbol id="i-x" viewBox="0 0 24 24">
+        <path d="M6 6l12 12M18 6L6 18" />
+      </symbol>
     </svg>
   );
 }

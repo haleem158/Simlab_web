@@ -1,9 +1,5 @@
-import { LandingPage } from "../../components/sl/landing/LandingPage";
+import { Landing } from "../../components/lp/Landing";
 
 export default function Home() {
-  return (
-    <div className="slab">
-      <LandingPage />
-    </div>
-  );
+  return <Landing />;
 }

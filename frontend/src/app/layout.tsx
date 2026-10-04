@@ -21,13 +21,23 @@ const inter = localFont({
       weight: "600",
       style: "normal",
     },
+    {
+      path: "../fonts/inter-latin-700-normal.woff2",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "../fonts/inter-latin-800-normal.woff2",
+      weight: "800",
+      style: "normal",
+    },
   ],
   variable: "--font-inter",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "SIMLAB - Tokenomics Simulation Suite",
+  title: "Simlab - Tokenomics Simulation Suite",
   description:
     "Design, test, and visualize token economies with data-driven models",
 };

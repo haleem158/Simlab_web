@@ -1,5 +1,6 @@
-import { Sidebar } from "../../components/sl/dashboard/Sidebar";
-import { Topbar } from "../../components/sl/dashboard/Topbar";
+import { MobileTabs } from '../../components/sl/MobileTabs';
+import { Sidebar } from '../../components/sl/dashboard/Sidebar';
+import { Topbar } from '../../components/sl/dashboard/Topbar';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -11,6 +12,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           {children}
         </div>
       </div>
+      <MobileTabs />
     </div>
   );
 }
