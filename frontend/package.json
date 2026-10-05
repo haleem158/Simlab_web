@@ -13,6 +13,7 @@
     "axios": "^1.13.2",
     "clsx": "^2.0.0",
     "date-fns": "^3.6.0",
+    "ethers": "^6.16.0",
     "lucide-react": "^0.303.0",
     "next": "^14.0.4",
     "papaparse": "^5.5.3",

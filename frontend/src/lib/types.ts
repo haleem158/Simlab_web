@@ -9,14 +9,14 @@ export interface TokenSupplyParams {
   annual_inflation_rate: number;
   min_inflation_rate: number;
   inflation_decay_rate: number;
-  inflation_applies_to: 'circulating' | 'remaining';
+  inflation_applies_to: "circulating" | "remaining";
   staking_rate: number;
   staking_adoption_slope: number;
   staking_reward_share: number;
   burn_rate: number;
   tx_activity_index: number;
   vesting_months: number;
-  vesting_curve: 'linear' | 'exponential';
+  vesting_curve: "linear" | "exponential";
   demand_index_base: number;
   demand_growth_rate: number;
   price_scale: number;
@@ -111,7 +111,7 @@ export interface TokenImpactParams {
   k?: number | null;
   epsilon: number;
   calibrate: boolean;
-  anchor_mode?: 'current_price' | 'current_market_cap' | 'none';
+  anchor_mode?: "current_price" | "current_market_cap" | "none";
   anchor_price?: number;
   anchor_market_cap?: number;
   anchor_supply_idx?: number;

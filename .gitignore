@@ -38,3 +38,12 @@ Thumbs.db
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Backups, packages and patches
+*.zip
+*.patch
+src_old/
+
+# Python bytecode
+__pycache__/
+*.pyc
