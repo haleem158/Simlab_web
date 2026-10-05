@@ -62,6 +62,7 @@ class TokenImpactResponse(BaseModel):
     data: List[MonthlyImpactData]
     summary: dict
     metadata: dict
+    mc: Optional[List[dict]] = None
 
 class SampleCSVResponse(BaseModel):
     """Sample CSV data response"""

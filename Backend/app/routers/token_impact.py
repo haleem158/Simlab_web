@@ -29,13 +29,19 @@ async def simulate_token_impact(params: TokenImpactParams):
             "total_months": len(results),
             "calibrated": params.calibrate
         }
+
+        # Uncertainty band (25th / median / 75th percentile of price), only when requested
+        mc = None
+        if params.run_monte_carlo:
+            mc = TokenImpactSimulator.monte_carlo(params).to_dict("records")
         
         return TokenImpactResponse(
             success=True,
             params=params,
             data=results,
             summary=summary,
-            metadata=metadata
+            metadata=metadata,
+            mc=mc
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
