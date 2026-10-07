@@ -259,7 +259,7 @@ export default function TokenImpactModel() {
 
   return (
     <div className={`pgi${tab === "params" ? " hasbar" : ""}`}>
-      <PageHeader kicker="Market model" title="Token Price Impact Model">
+      <PageHeader help="/guide#price-impact" kicker="Market model" title="Token Price Impact Model">
         <button
           type="button"
           className="btn ghost"

@@ -1,14 +1,20 @@
 # backend/app/main.py
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import token_supply, token_impact, vesting  # Add token_impact
+
+# The interactive API docs are off by default. For local development set ENABLE_DOCS=1
+# and open /api/docs.
+DOCS_ON = os.getenv("ENABLE_DOCS", "").strip().lower() in ("1", "true", "yes")
 
 app = FastAPI(
     title="SIMLAB API",
     description="Tokenomics Simulation API for Web3 protocols",
     version="1.0.0",
-    docs_url="/api/docs",
-    redoc_url="/api/redoc"
+    docs_url="/api/docs" if DOCS_ON else None,
+    redoc_url="/api/redoc" if DOCS_ON else None,
+    openapi_url="/api/openapi.json" if DOCS_ON else None,
 )
 
 # CORS configuration
@@ -33,11 +39,10 @@ app.include_router(vesting.router, prefix="/api/v1/vesting", tags=["Vesting"])
 
 @app.get("/")
 async def root():
-    return {
-        "message": "SIMLAB API",
-        "version": "1.0.0",
-        "docs": "/api/docs"
-    }
+    info = {"message": "SIMLAB API", "version": "1.0.0"}
+    if DOCS_ON:
+        info["docs"] = "/api/docs"
+    return info
 
 @app.get("/health")
 async def health_check():

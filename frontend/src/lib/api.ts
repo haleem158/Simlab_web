@@ -94,25 +94,6 @@ class ApiClient {
     return response.data;
   }
 
-  async saveVestingProfile(profileName: string, params: any) {
-    const response = await this.client.post(
-      `/api/v1/vesting/profiles?name=${encodeURIComponent(profileName)}`,
-      params,
-    );
-    return response.data;
-  }
-  async getVestingProfile(profileId: string) {
-    const response = await this.client.get(
-      `/api/v1/vesting/profiles/${profileId}`,
-    );
-    return response.data;
-  }
-
-  async listVestingProfiles() {
-    const response = await this.client.get("/api/v1/vesting/profiles");
-    return response.data;
-  }
-
   async getVestingPresets() {
     const response = await this.client.get("/api/v1/vesting/presets");
     return response.data;

@@ -45,7 +45,7 @@ class TokenImpactParams(BaseModel):
     # Monte Carlo
     run_monte_carlo: bool = False
     mc_jitter_std: float = Field(default=0.05, ge=0, le=1)
-    mc_runs: int = Field(default=200, ge=10, le=1000)
+    mc_runs: int = Field(default=200, ge=10, le=500)
 
 class MonthlyImpactData(BaseModel):
     """Monthly impact data point"""

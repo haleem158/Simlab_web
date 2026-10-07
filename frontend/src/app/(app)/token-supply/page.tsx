@@ -235,7 +235,7 @@ export default function TokenSupplySimulator() {
 
   return (
     <div className={`pgi${tab === "params" ? " hasbar" : ""}`}>
-      <PageHeader kicker="Supply model" title="Token Supply Simulator">
+      <PageHeader help="/guide#token-supply" kicker="Supply model" title="Token Supply Simulator">
         <button
           type="button"
           className="btn ghost"

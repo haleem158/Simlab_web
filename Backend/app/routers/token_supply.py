@@ -54,6 +54,12 @@ async def monte_carlo_simulation(params: TokenSupplyParams):
     
     Returns aggregated statistics with confidence intervals
     """
+    # Keep one request from tying up the server: years x 12 months x runs is the amount of work
+    if params.years * 12 * params.runs > 300_000:
+        raise HTTPException(
+            status_code=422,
+            detail="This Monte Carlo run is too large. Lower the years or the number of runs.",
+        )
     try:
         if not params.stochastic:
             raise HTTPException(

@@ -2,18 +2,11 @@ from fastapi import APIRouter, HTTPException
 from app.models.vesting import (
     VestingParams,
     VestingResponse,
-    VestingProfile,
     VestingRole
 )
 from app.services.vesting_simulator import VestingSimulator
-from typing import List
-import uuid
-from datetime import datetime
 
 router = APIRouter()
-
-# In-memory storage for profiles (use database in production)
-profiles_storage: dict[str, VestingProfile] = {}
 
 @router.post("/simulate", response_model=VestingResponse)
 async def simulate_vesting(params: VestingParams):
@@ -72,55 +65,6 @@ async def simulate_vesting(params: VestingParams):
         error_detail = f"Simulation failed: {str(e)}\n{traceback.format_exc()}"
         print(error_detail)  # Log to console for debugging
         raise HTTPException(status_code=500, detail=f"Simulation failed: {str(e)}")
-
-@router.post("/profiles", response_model=VestingProfile)
-async def save_profile(name: str, params: VestingParams):
-    """Save a vesting profile for later retrieval"""
-    try:
-        # Run simulation to get summary
-        results = VestingSimulator.simulate(params)
-        pv_unlocked = VestingSimulator.calculate_present_value(results, params.annual_discount_rate)
-        
-        final = results[-1]
-        summary = {
-            "final_cumulative_unlocked": final.total_unlocked,
-            "final_effective_circulating": final.effective_circulating,
-            "pv_unlocked": pv_unlocked
-        }
-        
-        profile = VestingProfile(
-            id=str(uuid.uuid4()),
-            name=name,
-            created_at=datetime.utcnow().isoformat(),
-            params=params,
-            summary=summary
-        )
-        
-        profiles_storage[profile.id] = profile
-        return profile
-    
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to save profile: {str(e)}")
-
-@router.get("/profiles", response_model=List[VestingProfile])
-async def list_profiles():
-    """List all saved vesting profiles"""
-    return list(profiles_storage.values())
-
-@router.get("/profiles/{profile_id}", response_model=VestingProfile)
-async def get_profile(profile_id: str):
-    """Retrieve a specific vesting profile"""
-    if profile_id not in profiles_storage:
-        raise HTTPException(status_code=404, detail="Profile not found")
-    return profiles_storage[profile_id]
-
-@router.delete("/profiles/{profile_id}")
-async def delete_profile(profile_id: str):
-    """Delete a vesting profile"""
-    if profile_id not in profiles_storage:
-        raise HTTPException(status_code=404, detail="Profile not found")
-    del profiles_storage[profile_id]
-    return {"success": True, "message": "Profile deleted"}
 
 @router.get("/presets")
 async def get_presets():
