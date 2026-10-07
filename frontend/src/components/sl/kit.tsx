@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import {
@@ -434,10 +435,12 @@ export function ChartPanel({
 export function PageHeader({
   kicker,
   title,
+  help,
   children,
 }: {
   kicker: string;
   title: string;
+  help?: string;
   children: ReactNode;
 }) {
   return (
@@ -445,6 +448,11 @@ export function PageHeader({
       <div>
         <div className="rec">{kicker}</div>
         <h2>{title}</h2>
+        {help ? (
+          <Link className="helplink" href={help}>
+            How to use this page
+          </Link>
+        ) : null}
       </div>
       <div className="rr">{children}</div>
     </div>

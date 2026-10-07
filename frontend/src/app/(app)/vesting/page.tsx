@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import apiClient from "@/lib/api";
 import { getRun, saveRun, vestingRecord } from "@/lib/runs";
+import { deleteProfile, saveProfile, useProfiles } from "@/lib/profiles";
 import type { VestingParams } from "@/lib/types";
 import { Icon } from "@/components/sl/Icon";
 import { MobileSeg, type SimTab } from "@/components/sl/MobileSeg";
@@ -32,18 +33,10 @@ import {
   percentLabel,
 } from "@/lib/charts";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const PRESETS = [
   { id: "Standard Startup", label: "Standard startup" },
   { id: "DAO Governance", label: "DAO governance" },
 ];
-
-type Profile = {
-  id: string;
-  name: string;
-  created_at: string;
-  params: VestingParams;
-};
 
 const DEFAULTS: VestingParams = {
   total_supply: 1_000_000_000,
@@ -77,7 +70,7 @@ export default function VestingSimulator() {
   const [results, setResults] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const profiles = useProfiles();
   const [preset, setPreset] = useState<string | null>(null);
   const [runId, setRunId] = useState(0);
   const [tab, setTab] = useState<SimTab>("params");
@@ -93,21 +86,13 @@ export default function VestingSimulator() {
     0,
   );
 
-  const loadProfiles = async () => {
-    try {
-      setProfiles(await apiClient.listVestingProfiles());
-    } catch {
-      /* profiles are optional */
-    }
-  };
-
   useEffect(() => {
     const rec = getRun(new URLSearchParams(window.location.search).get("run"));
-    if (rec && rec.type === "vesting") reset({ ...DEFAULTS, ...(rec.params as Partial<VestingParams>) });
+    if (rec && rec.type === "vesting")
+      reset({ ...DEFAULTS, ...(rec.params as Partial<VestingParams>) });
   }, [reset]);
 
   useEffect(() => {
-    loadProfiles();
     if (
       process.env.NEXT_PUBLIC_VISUAL_TEST === "1" &&
       new URLSearchParams(window.location.search).get("fixture") === "1"
@@ -171,23 +156,17 @@ export default function VestingSimulator() {
     });
   };
 
-  const saveProfile = async () => {
-    const name = prompt("Enter profile name:");
+  const onSaveProfile = () => {
+    const name = prompt(
+      "Name this profile (it is saved in this browser only):",
+    );
     if (!name) return;
-    try {
-      const res = await fetch(
-        `${API}/api/v1/vesting/profiles?name=${encodeURIComponent(name)}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(watch()),
-        },
+    const rec = saveProfile(name, watch());
+    if (rec) setProfileId(rec.id);
+    else
+      setError(
+        "This browser would not save the profile. Check that storage is allowed.",
       );
-      if (res.ok) loadProfiles();
-      else setError((await res.json()).detail || "Failed to save profile");
-    } catch (err: any) {
-      setError("Failed to save profile: " + err.message);
-    }
   };
 
   const pickProfile = (id: string) => {
@@ -199,17 +178,10 @@ export default function VestingSimulator() {
     setError(null);
   };
 
-  const deleteProfile = async () => {
+  const onDeleteProfile = () => {
     if (!profileId || !confirm("Delete this profile?")) return;
-    try {
-      await fetch(`${API}/api/v1/vesting/profiles/${profileId}`, {
-        method: "DELETE",
-      });
-      setProfileId("");
-      loadProfiles();
-    } catch {
-      setError("Failed to delete profile");
-    }
+    deleteProfile(profileId);
+    setProfileId("");
   };
 
   const view = useMemo(() => {
@@ -254,7 +226,7 @@ export default function VestingSimulator() {
 
   return (
     <div className={`pgi${tab === "params" ? " hasbar" : ""}`}>
-      <PageHeader kicker="Unlock model" title="Vesting Schedule Simulator">
+      <PageHeader help="/guide#vesting" kicker="Unlock model" title="Vesting Schedule Simulator">
         <div className="deskonly">
           <Chips items={PRESETS} active={preset} onPick={loadPreset} />
         </div>
@@ -488,7 +460,7 @@ export default function VestingSimulator() {
                 <div className="hint">
                   <button
                     type="button"
-                    onClick={deleteProfile}
+                    onClick={onDeleteProfile}
                     style={{ color: "#f87171", fontSize: 11 }}
                   >
                     Delete this profile
@@ -501,7 +473,7 @@ export default function VestingSimulator() {
                 type="button"
                 className="btn ghost"
                 style={{ height: 48, borderRadius: 14, flex: 1, fontSize: 14 }}
-                onClick={saveProfile}
+                onClick={onSaveProfile}
               >
                 Save profile
               </button>
@@ -525,163 +497,168 @@ export default function VestingSimulator() {
       </form>
 
       <div className={tab === "params" ? "tab-hide" : undefined}>
-      {view && stackAxis && cgAxis && infAxis ? (
-        <>
-          <div
-            className="kps"
-            style={{
-              gridTemplateColumns: "repeat(4,minmax(0,1fr))",
-              marginTop: 20,
-            }}
-          >
-            <Kpi
-              runKey={runId}
-              label="Total unlocked"
-              parts={moneyParts(view.s.final_cumulative_unlocked)}
-              delta={`${((view.s.final_cumulative_unlocked / view.supply) * 100).toFixed(1)}% of supply`}
-              tone="g"
-            />
-            <Kpi
-              runKey={runId}
-              label="Circulating"
-              parts={moneyParts(view.s.final_effective_circulating)}
-              delta={`${((view.s.final_effective_circulating / view.supply) * 100).toFixed(1)}% of supply`}
-            />
-            <Kpi
-              runKey={runId}
-              label="Gov locked"
-              parts={moneyParts(view.s.final_governance_locked)}
-              delta={`${view.s.final_cumulative_unlocked ? ((view.s.final_governance_locked / view.s.final_cumulative_unlocked) * 100).toFixed(1) : "0.0"}% of unlocked`}
-            />
-            <Kpi
-              runKey={runId}
-              label="Present value"
-              parts={moneyParts(view.s.pv_unlocked)}
-              delta={`At ${Math.round(view.rate * 100)}% discount rate`}
-            />
-          </div>
-
-          <ChartPanel
-            title="Cumulative unlocks by role"
-            sub={`Stacked token unlocks over ${view.n} months`}
-            legend={
-              <Legend
-                items={view.names.map((n) => ({
-                  color: view.color[n],
-                  text: n,
-                }))}
-              />
-            }
-          >
-            <Chart
-              defaultWidth={1098}
-              label="Cumulative unlocks by role"
-              y={{
-                min: stackAxis.min,
-                max: stackAxis.max,
-                ticks: stackAxis.ticks,
-                fmt: compact,
+        {view && stackAxis && cgAxis && infAxis ? (
+          <>
+            <div
+              className="kps"
+              style={{
+                gridTemplateColumns: "repeat(4,minmax(0,1fr))",
+                marginTop: 20,
               }}
-              xLabels={xl}
-              xName={mName}
-              valueFmt={compact}
-              layers={[{ type: "stack", layers: view.layers }]}
-            />
-          </ChartPanel>
+            >
+              <Kpi
+                runKey={runId}
+                label="Total unlocked"
+                parts={moneyParts(view.s.final_cumulative_unlocked)}
+                delta={`${((view.s.final_cumulative_unlocked / view.supply) * 100).toFixed(1)}% of supply`}
+                tone="g"
+              />
+              <Kpi
+                runKey={runId}
+                label="Circulating"
+                parts={moneyParts(view.s.final_effective_circulating)}
+                delta={`${((view.s.final_effective_circulating / view.supply) * 100).toFixed(1)}% of supply`}
+              />
+              <Kpi
+                runKey={runId}
+                label="Gov locked"
+                parts={moneyParts(view.s.final_governance_locked)}
+                delta={`${view.s.final_cumulative_unlocked ? ((view.s.final_governance_locked / view.s.final_cumulative_unlocked) * 100).toFixed(1) : "0.0"}% of unlocked`}
+              />
+              <Kpi
+                runKey={runId}
+                label="Present value"
+                parts={moneyParts(view.s.pv_unlocked)}
+                delta={`At ${Math.round(view.rate * 100)}% discount rate`}
+              />
+            </div>
 
-          <div className="cols2">
             <ChartPanel
-              className="cp0"
-              title="Circulating vs governance-locked"
-              sub="Tokens by availability"
+              title="Cumulative unlocks by role"
+              sub={`Stacked token unlocks over ${view.n} months`}
+              legend={
+                <Legend
+                  items={view.names.map((n) => ({
+                    color: view.color[n],
+                    text: n,
+                  }))}
+                />
+              }
             >
               <Chart
-                defaultWidth={520}
-                height={230}
-                label="Circulating versus governance-locked tokens"
+                defaultWidth={1098}
+                label="Cumulative unlocks by role"
                 y={{
-                  min: cgAxis.min,
-                  max: cgAxis.max,
-                  ticks: cgAxis.ticks,
+                  min: stackAxis.min,
+                  max: stackAxis.max,
+                  ticks: stackAxis.ticks,
                   fmt: compact,
                 }}
                 xLabels={xl}
                 xName={mName}
                 valueFmt={compact}
-                layers={[
-                  {
-                    type: "line",
-                    name: "Circulating",
-                    values: view.eff,
-                    color: "#a78bfa",
-                    fill: 0.14,
-                  },
-                  {
-                    type: "line",
-                    name: "Gov locked",
-                    values: view.gov,
-                    color: "#fbbf24",
-                    fill: 0.1,
-                  },
-                ]}
-              />
-              <div className="lg" style={{ marginTop: 8 }}>
-                <span>
-                  <i style={{ background: "#a78bfa" }} />
-                  Circulating
-                </span>
-                <span>
-                  <i style={{ background: "#fbbf24" }} />
-                  Gov locked
-                </span>
-              </div>
-            </ChartPanel>
-            <ChartPanel
-              className="cp0"
-              title="Monthly inflation rate"
-              sub="New circulating tokens as % of total supply"
-            >
-              <Chart
-                defaultWidth={520}
-                height={230}
-                label="Monthly inflation rate"
-                y={{
-                  min: infAxis.min,
-                  max: infAxis.max,
-                  ticks: infAxis.ticks,
-                  fmt: percentLabel,
-                }}
-                xLabels={xl}
-                xName={mName}
-                valueFmt={(v) => `${v.toFixed(3)}%`}
-                layers={[
-                  {
-                    type: "bars",
-                    name: "Inflation",
-                    values: view.infl,
-                    color: "#6d4cf5",
-                  },
-                ]}
+                layers={[{ type: "stack", layers: view.layers }]}
               />
             </ChartPanel>
+
+            <div className="cols2">
+              <ChartPanel
+                className="cp0"
+                title="Circulating vs governance-locked"
+                sub="Tokens by availability"
+              >
+                <Chart
+                  defaultWidth={520}
+                  height={230}
+                  label="Circulating versus governance-locked tokens"
+                  y={{
+                    min: cgAxis.min,
+                    max: cgAxis.max,
+                    ticks: cgAxis.ticks,
+                    fmt: compact,
+                  }}
+                  xLabels={xl}
+                  xName={mName}
+                  valueFmt={compact}
+                  layers={[
+                    {
+                      type: "line",
+                      name: "Circulating",
+                      values: view.eff,
+                      color: "#a78bfa",
+                      fill: 0.14,
+                    },
+                    {
+                      type: "line",
+                      name: "Gov locked",
+                      values: view.gov,
+                      color: "#fbbf24",
+                      fill: 0.1,
+                    },
+                  ]}
+                />
+                <div className="lg" style={{ marginTop: 8 }}>
+                  <span>
+                    <i style={{ background: "#a78bfa" }} />
+                    Circulating
+                  </span>
+                  <span>
+                    <i style={{ background: "#fbbf24" }} />
+                    Gov locked
+                  </span>
+                </div>
+              </ChartPanel>
+              <ChartPanel
+                className="cp0"
+                title="Monthly inflation rate"
+                sub="New circulating tokens as % of total supply"
+              >
+                <Chart
+                  defaultWidth={520}
+                  height={230}
+                  label="Monthly inflation rate"
+                  y={{
+                    min: infAxis.min,
+                    max: infAxis.max,
+                    ticks: infAxis.ticks,
+                    fmt: percentLabel,
+                  }}
+                  xLabels={xl}
+                  xName={mName}
+                  valueFmt={(v) => `${v.toFixed(3)}%`}
+                  layers={[
+                    {
+                      type: "bars",
+                      name: "Inflation",
+                      values: view.infl,
+                      color: "#6d4cf5",
+                    },
+                  ]}
+                />
+              </ChartPanel>
+            </div>
+          </>
+        ) : (
+          <div style={{ marginTop: 20 }}>
+            <EmptyState
+              title={isLoading ? "Running simulation" : "No simulation yet"}
+              text={
+                isLoading
+                  ? "Calculating unlock schedules…"
+                  : 'Add roles, set cliffs and vesting periods, then press "Run simulation".'
+              }
+            />
           </div>
-        </>
-      ) : (
-        <div style={{ marginTop: 20 }}>
-          <EmptyState
-            title={isLoading ? "Running simulation" : "No simulation yet"}
-            text={
-              isLoading
-                ? "Calculating unlock schedules…"
-                : 'Add roles, set cliffs and vesting periods, then press "Run simulation".'
-            }
-          />
-        </div>
-      )}
+        )}
       </div>
       {tab === "params" ? (
         <div className="runbar">
-          <button type="submit" form="vesting-form" className="btn lavb" disabled={isLoading || totalAllocation > 100}>
+          <button
+            type="submit"
+            form="vesting-form"
+            className="btn lavb"
+            disabled={isLoading || totalAllocation > 100}
+          >
             {isLoading ? "Running…" : "Run simulation"}
             <Icon n="flask" style={{ width: 18, height: 18 }} />
           </button>

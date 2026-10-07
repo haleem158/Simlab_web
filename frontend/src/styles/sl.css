@@ -444,3 +444,47 @@ html,body{background:#000}
 .slab .cert .certok .tx{font-size:12px;color:#86efac;word-break:break-all}
 .slab .cert .certok .btn{height:42px;border-radius:12px;font-size:13px}
 @media (max-width:1024px){.slab .cert .certrow{grid-template-columns:1fr}.slab .cert .certscore{justify-content:space-between}}
+
+/* ---- help links ---- */
+.slab .helplink{display:inline-block;margin-top:8px;font-size:13px;color:var(--lav)}
+.slab .helplink:hover{text-decoration:underline}
+.slab .helpbtn{display:none;width:38px;height:38px;border:1px solid #232327;border-radius:12px;align-items:center;justify-content:center;color:#d4d4d8}
+@media (max-width:1024px){.slab .helpbtn{display:flex}}
+
+/* ---- guide page ---- */
+.slab .guide{max-width:1000px;margin:0 auto}
+.slab .gtitle{margin:8px 0 0;font-size:34px;font-weight:500;letter-spacing:-1px}
+.slab .gintro{margin-top:12px;max-width:680px;font-size:16px;line-height:1.65;color:#9a9aa5}
+.slab .gjump{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.slab .gjump a{height:36px;padding:0 14px;border:1px solid #232327;border-radius:999px;font-size:13px;color:#d4cbff;display:flex;align-items:center;background:#0a0a0c}
+.slab .gjump a:hover{border-color:#6d4cf5}
+.slab .gsec{margin-top:20px;scroll-margin-top:84px}
+.slab .gh{font-size:24px;font-weight:500;letter-spacing:-.6px;margin-top:6px}
+.slab .ganswer{margin-top:8px;font-size:15px;line-height:1.6;color:#c4c4cc}
+.slab .gsub{margin-top:26px;font-size:13px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:#8b8b95}
+.slab .gp{margin-top:10px;font-size:14px;line-height:1.7;color:#a1a1aa}
+.slab .gp b,.slab .gstep b{font-weight:500;color:#f5f5f7}
+.slab .gl{margin-top:10px}
+.slab .gi{display:grid;grid-template-columns:200px minmax(0,1fr) 170px;gap:6px 24px;padding:14px 0;border-top:1px solid #131316}
+.slab .gn{font-size:14px;font-weight:500;color:#f5f5f7}
+.slab .gd{font-size:14px;line-height:1.65;color:#a1a1aa}
+.slab .gt{font-size:12px;line-height:1.5;color:#b9a7ff;align-self:start}
+.slab .gex{margin-top:24px;border-left:3px solid #6d4cf5;background:#0c0a1e;border-radius:0 14px 14px 0;padding:16px 18px}
+.slab .gex b{font-size:13px;color:#b9a7ff}
+.slab .gex p{margin-top:6px;font-size:14px;line-height:1.7;color:#d4d4d8}
+.slab .gopen{margin-top:26px;height:44px;border-radius:12px;font-size:14px;padding:0 20px;display:inline-flex}
+.slab .gsteps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:18px}
+.slab .gstep{border:1px solid #17171b;border-radius:18px;padding:20px;background:#08080a}
+.slab .gstep span{width:30px;height:30px;border-radius:50%;background:#1a1538;color:#b9a7ff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600}
+.slab .gstep h4{margin-top:14px;font-size:16px;font-weight:500}
+.slab .gstep p{margin-top:8px;font-size:13.5px;line-height:1.7;color:#a1a1aa}
+.slab .gnote{margin-top:18px;font-size:13px;line-height:1.6;color:#8b8b95}
+@media (max-width:1024px){
+  .slab .gtitle{font-size:28px}
+  .slab .gsteps{grid-template-columns:1fr}
+  .slab .gi{grid-template-columns:1fr;gap:4px}
+  .slab .gh{font-size:22px}
+  .slab .gsec{padding:18px}
+}
+.slab .panel h3.gh{font-size:24px;font-weight:500;letter-spacing:-.6px;margin-top:6px}
+@media (max-width:1024px){.slab .panel h3.gh{font-size:22px}}

@@ -6,13 +6,12 @@ import { Icon } from "../Icon";
 import { Logo } from "../Logo";
 import { ApiStatus } from "../ApiStatus";
 
-const API = process.env.NEXT_PUBLIC_API_URL?.trim() || "http://localhost:8000";
-
 const NAV = [
   { href: "/dashboard", icon: "dash", label: "Dashboard" },
   { href: "/token-supply", icon: "coins", label: "Token supply" },
   { href: "/vesting", icon: "cal", label: "Vesting" },
   { href: "/token-impact", icon: "down", label: "Price impact" },
+  { href: "/guide", icon: "book", label: "Guide" },
 ];
 
 export function Sidebar() {
@@ -42,16 +41,6 @@ export function Sidebar() {
             {n.label}
           </Link>
         ))}
-        <a
-          className="ni"
-          href={`${API}/api/docs`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Icon n="db" />
-          API docs
-          <Icon n="ur" style={{ width: 13, height: 13, marginLeft: -4 }} />
-        </a>
       </nav>
       <ApiStatus />
     </aside>
