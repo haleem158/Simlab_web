@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import apiClient from "@/lib/api";
-import { getRun, saveRun, supplyRecord } from "@/lib/runs";
+import { getRun, saveRun, supplyRecord, type NewRun } from "@/lib/runs";
+import { ShareButton } from "@/components/sl/ShareButton";
 import type {
   MonteCarloResponse,
   TokenSupplyParams,
@@ -73,6 +74,7 @@ const last = <T,>(a: T[]) => a[a.length - 1];
 
 export default function TokenSupplySimulator() {
   const [isLoading, setIsLoading] = useState(false);
+  const [shareRun, setShareRun] = useState<NewRun | null>(null);
   const [results, setResults] = useState<TokenSupplyResponse | null>(null);
   const [mcResults, setMcResults] = useState<MonteCarloResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -111,6 +113,7 @@ export default function TokenSupplySimulator() {
         initial_supply: f.params.initial_supply,
         total_supply: f.params.total_supply,
       });
+      setShareRun(supplyRecord(f.params, { mc: f.mc }));
       setRunId((n) => n + 1);
     });
   }, [reset]);
@@ -130,14 +133,18 @@ export default function TokenSupplySimulator() {
           data,
         )) as MonteCarloResponse;
         setMcResults(r);
-        saveRun(supplyRecord(data, { mc: r }));
+        const nr = supplyRecord(data, { mc: r });
+        saveRun(nr);
+        setShareRun(nr);
         setTab("results");
       } else {
         const r = (await apiClient.simulateTokenSupply(
           data,
         )) as TokenSupplyResponse;
         setResults(r);
-        saveRun(supplyRecord(data, { det: r }));
+        const nr = supplyRecord(data, { det: r });
+        saveRun(nr);
+        setShareRun(nr);
         setTab("results");
       }
       setRunId((n) => n + 1);
@@ -236,6 +243,7 @@ export default function TokenSupplySimulator() {
   return (
     <div className={`pgi${tab === "params" ? " hasbar" : ""}`}>
       <PageHeader help="/guide#token-supply" kicker="Supply model" title="Token Supply Simulator">
+        <ShareButton run={view ? shareRun : null} />
         <button
           type="button"
           className="btn ghost"
@@ -411,6 +419,7 @@ export default function TokenSupplySimulator() {
                 <Chart
                   defaultWidth={678}
                   label="Supply dynamics chart"
+                  share={{ title: "Supply dynamics", sub: `Circulating, staked and burned supply over ${+view.years.toFixed(1)} years` }}
                   y={{
                     min: supplyAxis.min,
                     max: supplyAxis.max,
@@ -469,6 +478,7 @@ export default function TokenSupplySimulator() {
                 <Chart
                   defaultWidth={678}
                   label="Price trajectory chart"
+                  share={{ title: "Price trajectory", sub: view.mc ? `Mean of ${view.runs} Monte Carlo runs, ±1 standard deviation band` : "Simulated token price over the period" }}
                   y={{
                     min: priceAxis.min,
                     max: priceAxis.max,
@@ -483,6 +493,7 @@ export default function TokenSupplySimulator() {
                       ? [
                           {
                             type: "band",
+                            name: "±1 std dev",
                             lo: view.lo,
                             hi: view.hi,
                             color: "#a78bfa",

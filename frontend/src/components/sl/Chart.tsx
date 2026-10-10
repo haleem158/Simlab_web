@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useIsMobile } from "@/lib/useIsMobile";
+import { registerChart } from "@/lib/shareCharts";
 
 export type Layer =
   | {
@@ -13,7 +14,7 @@ export type Layer =
       dash?: boolean;
       w?: number;
     }
-  | { type: "band"; lo: number[]; hi: number[]; color: string }
+  | { type: "band"; name?: string; lo: number[]; hi: number[]; color: string }
   | {
       type: "stack";
       layers: { name: string; values: number[]; color: string }[];
@@ -30,6 +31,8 @@ type Props = {
   height?: number;
   label: string;
   plain?: boolean;
+  /** Makes this chart available in the Share dialog. */
+  share?: { title: string; sub?: string };
 };
 
 type Pt = [number, number];
@@ -59,6 +62,7 @@ export function Chart({
   height = 250,
   label,
   plain,
+  share,
 }: Props) {
   const wrap = useRef<HTMLDivElement>(null);
   const [W, setW] = useState(defaultWidth);
@@ -74,6 +78,17 @@ export function Chart({
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
+
+  useEffect(() => {
+    if (!share) return;
+    return registerChart({
+      title: share.title,
+      sub: share.sub,
+      layers,
+      y,
+      xLabels,
+    });
+  });
 
   const mobile = useIsMobile();
   const H = mobile ? height - 40 : height;

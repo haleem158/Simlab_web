@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import apiClient from "@/lib/api";
-import { getRun, saveRun, vestingRecord } from "@/lib/runs";
+import { getRun, saveRun, vestingRecord, type NewRun } from "@/lib/runs";
+import { ShareButton } from "@/components/sl/ShareButton";
 import { deleteProfile, saveProfile, useProfiles } from "@/lib/profiles";
 import type { VestingParams } from "@/lib/types";
 import { Icon } from "@/components/sl/Icon";
@@ -69,6 +70,7 @@ const DEFAULTS: VestingParams = {
 export default function VestingSimulator() {
   const [results, setResults] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [shareRun, setShareRun] = useState<NewRun | null>(null);
   const [error, setError] = useState<string | null>(null);
   const profiles = useProfiles();
   const [preset, setPreset] = useState<string | null>(null);
@@ -102,6 +104,7 @@ export default function VestingSimulator() {
         reset({ ...DEFAULTS, ...f.params });
         setPreset(f.preset);
         setResults(f.result);
+        setShareRun(vestingRecord(f.params, f.result));
         setRunId((n) => n + 1);
       });
     }
@@ -118,7 +121,9 @@ export default function VestingSimulator() {
     try {
       const r = await apiClient.simulateVesting(data);
       setResults(r);
-      saveRun(vestingRecord(data, r));
+      const nr = vestingRecord(data, r);
+      saveRun(nr);
+      setShareRun(nr);
       setTab("results");
       setRunId((n) => n + 1);
     } catch (err: any) {
@@ -230,6 +235,7 @@ export default function VestingSimulator() {
         <div className="deskonly">
           <Chips items={PRESETS} active={preset} onPick={loadPreset} />
         </div>
+        <ShareButton run={view ? shareRun : null} />
         <button
           type="button"
           className="btn ghost"
@@ -548,6 +554,7 @@ export default function VestingSimulator() {
               <Chart
                 defaultWidth={1098}
                 label="Cumulative unlocks by role"
+                share={{ title: "Cumulative unlocks", sub: `Stacked token unlocks by role over ${view.n} months` }}
                 y={{
                   min: stackAxis.min,
                   max: stackAxis.max,
@@ -571,6 +578,7 @@ export default function VestingSimulator() {
                   defaultWidth={520}
                   height={230}
                   label="Circulating versus governance-locked tokens"
+                  share={{ title: "Circulating vs locked", sub: "Tokens by availability" }}
                   y={{
                     min: cgAxis.min,
                     max: cgAxis.max,
@@ -617,6 +625,7 @@ export default function VestingSimulator() {
                   defaultWidth={520}
                   height={230}
                   label="Monthly inflation rate"
+                  share={{ title: "Monthly inflation", sub: "New circulating tokens as % of total supply" }}
                   y={{
                     min: infAxis.min,
                     max: infAxis.max,
