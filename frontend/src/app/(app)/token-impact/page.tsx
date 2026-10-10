@@ -4,7 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import Papa from "papaparse";
 import apiClient from "@/lib/api";
-import { getRun, impactRecord, saveRun } from "@/lib/runs";
+import { getRun, impactRecord, saveRun, type NewRun } from "@/lib/runs";
+import { ShareButton } from "@/components/sl/ShareButton";
 import { Icon } from "@/components/sl/Icon";
 import { MobileSeg, type SimTab } from "@/components/sl/MobileSeg";
 import { Chart } from "@/components/sl/Chart";
@@ -84,6 +85,7 @@ export default function TokenImpactModel() {
   const [csvData, setCsvData] = useState<CSVRow[]>([]);
   const [results, setResults] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [shareRun, setShareRun] = useState<NewRun | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [runId, setRunId] = useState(0);
   const [tab, setTab] = useState<SimTab>("params");
@@ -114,6 +116,7 @@ export default function TokenImpactModel() {
       reset({ ...DEFAULTS, ...f.params });
       setResults(f.result);
       setRanParams({ ...DEFAULTS, ...f.params });
+      setShareRun(impactRecord({ ...DEFAULTS, ...f.params }, f.result));
       setRunId((n) => n + 1);
     });
   }, [reset]);
@@ -193,7 +196,9 @@ export default function TokenImpactModel() {
         ...data,
       });
       setResults(r);
-      saveRun(impactRecord(data, r));
+      const nr = impactRecord(data, r);
+      saveRun(nr);
+      setShareRun(nr);
       setTab("results");
       setRunId((n) => n + 1);
     } catch (err: any) {
@@ -260,6 +265,7 @@ export default function TokenImpactModel() {
   return (
     <div className={`pgi${tab === "params" ? " hasbar" : ""}`}>
       <PageHeader help="/guide#price-impact" kicker="Market model" title="Token Price Impact Model">
+        <ShareButton run={view ? shareRun : null} />
         <button
           type="button"
           className="btn ghost"
@@ -490,6 +496,7 @@ export default function TokenImpactModel() {
                 <Chart
                   defaultWidth={678}
                   label="Supply and demand indices"
+                  share={{ title: "Supply & demand", sub: "Supply and demand indices relative to month 0" }}
                   y={{
                     min: dynAxis.min,
                     max: dynAxis.max,
@@ -537,6 +544,7 @@ export default function TokenImpactModel() {
                 <Chart
                   defaultWidth={678}
                   label="Price trajectory"
+                  share={{ title: "Price trajectory", sub: priceSub }}
                   y={{
                     min: priceAxis.min,
                     max: priceAxis.max,
@@ -551,6 +559,7 @@ export default function TokenImpactModel() {
                       ? [
                           {
                             type: "band",
+                            name: "P25 to P75",
                             lo: view.p25,
                             hi: view.p75,
                             color: "#a78bfa",

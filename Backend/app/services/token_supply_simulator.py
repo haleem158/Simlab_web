@@ -101,7 +101,9 @@ class TokenSupplySimulator:
             burned_tokens = min(non_staked, burn_from_activity)
             
             # Update supplies
-            circulating += new_tokens + staking_rewards - burned_tokens
+            # staking_rewards and treasury_issuance are the two halves of new_tokens,
+            # so only new_tokens is added (adding rewards again double counted them).
+            circulating += new_tokens - burned_tokens
             burned += burned_tokens
             minted_cumulative += new_tokens
             locked = max(0.0, total_supply - (circulating + burned + (remaining_cap - new_tokens)))
