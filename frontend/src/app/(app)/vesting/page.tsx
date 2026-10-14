@@ -19,6 +19,7 @@ import {
   Kpi,
   Legend,
   NumCell,
+  SelectCell,
   NumField,
   PageHeader,
   TextCell,
@@ -39,6 +40,25 @@ const PRESETS = [
   { id: "DAO Governance", label: "DAO governance" },
 ];
 
+const FREQUENCIES = [
+  { value: "biweekly", label: "Bi-weekly" },
+  { value: "monthly", label: "Monthly" },
+  { value: "quarterly", label: "Quarterly" },
+];
+
+/** Older presets, saved profiles and past runs have no release settings. */
+function withRoleDefaults<T extends { roles?: any[] }>(p: T): T {
+  if (!p || !Array.isArray(p.roles)) return p;
+  return {
+    ...p,
+    roles: p.roles.map((r) => ({
+      initial_unlock_pct: 0,
+      release_frequency: "monthly",
+      ...r,
+    })),
+  };
+}
+
 const DEFAULTS: VestingParams = {
   total_supply: 1_000_000_000,
   months: 60,
@@ -50,6 +70,8 @@ const DEFAULTS: VestingParams = {
       vesting_months: 48,
       activation_ratio: 0.7,
       governance_fraction: 0.1,
+      initial_unlock_pct: 0,
+      release_frequency: "monthly",
     },
     {
       name: "Investors",
@@ -58,6 +80,8 @@ const DEFAULTS: VestingParams = {
       vesting_months: 24,
       activation_ratio: 0.8,
       governance_fraction: 0.0,
+      initial_unlock_pct: 0,
+      release_frequency: "monthly",
     },
   ],
   stochastic: false,
@@ -91,7 +115,10 @@ export default function VestingSimulator() {
   useEffect(() => {
     const rec = getRun(new URLSearchParams(window.location.search).get("run"));
     if (rec && rec.type === "vesting")
-      reset({ ...DEFAULTS, ...(rec.params as Partial<VestingParams>) });
+      reset({
+        ...DEFAULTS,
+        ...withRoleDefaults(rec.params as Partial<VestingParams>),
+      });
   }, [reset]);
 
   useEffect(() => {
@@ -101,7 +128,7 @@ export default function VestingSimulator() {
     ) {
       import("@/lib/fixtures.json").then((m) => {
         const f = (m as any).default.vesting;
-        reset({ ...DEFAULTS, ...f.params });
+        reset({ ...DEFAULTS, ...withRoleDefaults(f.params) });
         setPreset(f.preset);
         setResults(f.result);
         setShareRun(vestingRecord(f.params, f.result));
@@ -138,7 +165,7 @@ export default function VestingSimulator() {
       const presets = await apiClient.getVestingPresets();
       const found = presets.find((p: any) => p.name === name);
       if (found?.params) {
-        Object.entries(found.params).forEach(([k, v]) =>
+        Object.entries(withRoleDefaults(found.params as any)).forEach(([k, v]) =>
           setValue(k as any, v as any),
         );
         setPreset(name);
@@ -158,6 +185,8 @@ export default function VestingSimulator() {
       vesting_months: 48,
       activation_ratio: 0.8,
       governance_fraction: 0,
+      initial_unlock_pct: 0,
+      release_frequency: "monthly",
     });
   };
 
@@ -178,7 +207,9 @@ export default function VestingSimulator() {
     setProfileId(id);
     const p = profiles.find((x) => x.id === id);
     if (!p) return;
-    Object.entries(p.params).forEach(([k, v]) => setValue(k as any, v as any));
+    Object.entries(withRoleDefaults(p.params as any)).forEach(([k, v]) =>
+      setValue(k as any, v as any),
+    );
     setPreset(null);
     setError(null);
   };
@@ -295,12 +326,14 @@ export default function VestingSimulator() {
             </div>
             <table className="tbl">
               <colgroup>
-                <col style={{ width: "18.89%" }} />
-                <col style={{ width: "14.63%" }} />
-                <col style={{ width: "15.56%" }} />
-                <col style={{ width: "18.89%" }} />
-                <col style={{ width: "12.59%" }} />
-                <col style={{ width: "19.44%" }} />
+                <col style={{ width: "14%" }} />
+                <col style={{ width: "11%" }} />
+                <col style={{ width: "10%" }} />
+                <col style={{ width: "10%" }} />
+                <col style={{ width: "10%" }} />
+                <col style={{ width: "17%" }} />
+                <col style={{ width: "12%" }} />
+                <col style={{ width: "16%" }} />
               </colgroup>
               <thead>
                 <tr>
@@ -308,6 +341,8 @@ export default function VestingSimulator() {
                   <th>Allocation %</th>
                   <th>Cliff (months)</th>
                   <th>Vesting (months)</th>
+                  <th>Initial unlock</th>
+                  <th>Released</th>
                   <th>Activation</th>
                   <th>Governance lock</th>
                 </tr>
@@ -350,6 +385,24 @@ export default function VestingSimulator() {
                         name={`roles.${i}.vesting_months` as const}
                         label="Vesting (months)"
                         rules={{ min: 1 }}
+                      />
+                    </td>
+                    <td data-label="Initial unlock">
+                      <NumCell
+                        control={control}
+                        name={`roles.${i}.initial_unlock_pct` as const}
+                        label="Initial unlock % at end of cliff"
+                        suffix="%"
+                        rules={{ min: 0, max: 100 }}
+                      />
+                    </td>
+                    <td data-label="Released">
+                      <SelectCell
+                        control={control}
+                        name={`roles.${i}.release_frequency` as const}
+                        label="Release frequency"
+                        options={FREQUENCIES}
+                        fallback="monthly"
                       />
                     </td>
                     <td data-label="Activation">

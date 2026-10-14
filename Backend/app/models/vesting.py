@@ -9,6 +9,14 @@ class VestingRole(BaseModel):
     vesting_months: int = Field(..., ge=1, le=240, description="Vesting duration in months")
     activation_ratio: float = Field(default=0.8, ge=0, le=1, description="Fraction entering circulation")
     governance_fraction: float = Field(default=0.0, ge=0, le=1, description="Governance-locked portion")
+    initial_unlock_pct: float = Field(
+        default=0.0, ge=0, le=100,
+        description="Percent of the allocation released in one go when the cliff ends"
+    )
+    release_frequency: Literal["biweekly", "monthly", "quarterly"] = Field(
+        default="monthly",
+        description="How often the remaining allocation is released after the cliff"
+    )
 
 class VestingParams(BaseModel):
     """Parameters for vesting schedule simulation"""

@@ -2,6 +2,10 @@ import numpy as np
 from typing import List
 from app.models.vesting import VestingParams, MonthlyVestingData
 
+# Length of one release period, in months
+PERIOD_MONTHS = {"biweekly": 12.0 / 26.0, "monthly": 1.0, "quarterly": 3.0}
+
+
 class VestingSimulator:
     """Core simulation engine for token vesting schedules"""
     
@@ -30,33 +34,29 @@ class VestingSimulator:
             cliff = role.cliff_months
             vesting = role.vesting_months
             
-            # Calculate effective vesting period
-            if cliff >= months:
-                effective_vesting = 0
-            else:
-                effective_vesting = min(vesting, months - cliff)
-            
-            # Calculate monthly unlock amount
-            if effective_vesting > 0:
-                monthly_amount = alloc_tokens / vesting
-            else:
-                monthly_amount = 0.0
-            
-            # Calculate monthly unlocks
+            # Release schedule: an optional initial unlock when the cliff ends,
+            # then equal releases every period until cliff + vesting_months.
+            period = PERIOD_MONTHS[role.release_frequency]
+            initial = alloc_tokens * role.initial_unlock_pct / 100.0
+            rest = alloc_tokens - initial
+            n_rel = max(1, int(np.ceil(vesting / period - 1e-9)))
+            per_release = rest / n_rel
+
+            # Month number n (1-based) holds every release that happens by then.
             monthly_unlocks = np.zeros(months)
-            for m in range(months):
-                if m < cliff:
-                    unlock = 0.0
-                elif m < cliff + effective_vesting:
-                    if params.stochastic and monthly_amount > 0:
-                        noise = np.random.normal(1.0, params.noise_std_pct)
-                        unlock = max(0.0, monthly_amount * noise)
-                    else:
-                        unlock = monthly_amount
-                else:
-                    unlock = 0.0
-                monthly_unlocks[m] = unlock
-            
+            if initial > 0 and cliff <= months:
+                monthly_unlocks[max(cliff, 1) - 1] += initial
+            for k in range(1, n_rel + 1):
+                t = min(cliff + k * period, cliff + vesting)
+                if t > months + 1e-9:
+                    break
+                idx = max(int(np.ceil(t - 1e-9)), 1) - 1
+                amount = per_release
+                if params.stochastic and per_release > 0:
+                    noise = np.random.normal(1.0, params.noise_std_pct)
+                    amount = max(0.0, per_release * noise)
+                monthly_unlocks[idx] += amount
+
             # Calculate cumulative unlocked
             cumulative_unlocked = np.cumsum(monthly_unlocks)
             
