@@ -140,6 +140,10 @@ export interface VestingRole {
   vesting_months: number; // ✅ Fixed: was "vesting_period"
   activation_ratio: number;
   governance_fraction: number;
+  /** Percent of the allocation released in one go when the cliff ends. */
+  initial_unlock_pct: number;
+  /** How often the rest is released after the cliff. */
+  release_frequency: "biweekly" | "monthly" | "quarterly";
 }
 
 export interface VestingParams {

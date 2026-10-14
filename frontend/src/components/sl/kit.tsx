@@ -132,6 +132,33 @@ export function NumCell<T extends FieldValues>(
   );
 }
 
+export function SelectCell<T extends FieldValues>(p: {
+  control: Control<T>;
+  name: Path<T>;
+  label: string;
+  options: { value: string; label: string }[];
+  fallback: string;
+}) {
+  const { field } = useController({ control: p.control, name: p.name });
+  return (
+    <div className="ce">
+      <select
+        aria-label={p.label}
+        value={(field.value as string) || p.fallback}
+        onChange={field.onChange}
+        onBlur={field.onBlur}
+        ref={field.ref}
+      >
+        {p.options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 export function TextCell<T extends FieldValues>(p: {
   control: Control<T>;
   name: Path<T>;
