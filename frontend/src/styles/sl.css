@@ -353,7 +353,7 @@ html,body{background:#000}
   .slab .homelink{display:none}
   .slab .nrm-menu{left:auto;right:0}
   .slab .tb .btn.lavb{height:38px!important;border-radius:12px!important;padding:0 14px!important;font-size:14px}
-  .slab .mtabs{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:#08080a;border-top:1px solid #1c1c20;padding:8px 6px calc(14px + env(safe-area-inset-bottom,0px))}
+  .slab .mtabs{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:#08080a;border-top:1px solid #1c1c20;padding:8px 6px calc(14px + env(safe-area-inset-bottom,0px))}
   .slab .mt{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:#8b8b95;padding:7px 0;border-radius:12px}
   .slab .mt.on{color:var(--lav);background:rgba(185,167,255,.1)}
   .slab .mseg{display:grid;grid-template-columns:1fr 1fr;background:#0a0a0c;border:1px solid #1f1f23;border-radius:14px;padding:4px;margin:18px 0 16px;position:sticky;top:60px;z-index:15}
@@ -503,3 +503,65 @@ html,body{background:#000}
 @media (max-width:640px){.slab .shbtns .btn{flex:1 1 45%}}
 .slab .ce select{appearance:none;-webkit-appearance:none;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none' stroke='%2371717a' stroke-width='1.6'%3E%3Cpath d='m1 1 4 4 4-4'/%3E%3C/svg%3E") no-repeat right 0 center;border:0;outline:0;color:inherit;font:inherit;width:100%;min-width:0;height:100%;padding:0 16px 0 0;cursor:pointer}
 .slab .ce select option{background:#0a0a0c;color:#f5f5f7}
+
+/* ---------- Valuation page ---------- */
+.slab .val{padding:28px 24px 96px}
+.slab .val-col{max-width:720px;margin:0 auto;font-variant-numeric:tabular-nums}
+.slab .val section{padding-top:44px}
+.slab .val .val-answer{padding-top:8px}
+.slab .val-say{margin:0;color:var(--muted);font-size:15px}
+.slab .val-big{margin:8px 0 0;font-size:clamp(40px,9vw,72px);font-weight:500;letter-spacing:-.045em;line-height:1.02;overflow-wrap:anywhere}
+.slab .val-agree{margin:14px 0 0;font-size:16px}
+.slab .val-fine{margin:6px 0 0;color:var(--muted);font-size:13px}
+.slab .val-track{position:relative;height:44px;margin:34px 0 0}
+.slab .val-track .ln{position:absolute;left:0;right:0;top:20px;height:4px;border-radius:2px;background:#26262a}
+.slab .val-track .sp{position:absolute;top:20px;height:4px;border-radius:2px;background:var(--violet);opacity:.55}
+.slab .val-track .dt{position:absolute;top:13px;width:18px;height:18px;margin-left:-9px;border-radius:50%;border:2px solid #000}
+.slab .val-axis{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-top:2px}
+.slab .val-methods{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:8px}
+.slab .val-methods li{display:flex;align-items:center;gap:10px;font-size:14px}
+.slab .val-methods i{width:10px;height:10px;border-radius:50%;flex:none}
+.slab .val-methods span{color:var(--muted);margin-left:auto}
+.slab .val h3.val-h{margin:0;font-size:20px;font-weight:600;letter-spacing:-.02em}
+.slab .val-lead{margin:6px 0 0;color:var(--muted);font-size:14px;max-width:60ch}
+.slab .val-q{margin-top:26px}
+.slab .val-q h4{margin:0 0 10px;font-size:15px;font-weight:500}
+.slab .val-seg{display:flex;flex-wrap:wrap;background:#0d0d0f;border:1px solid var(--line);border-radius:12px;padding:4px;gap:2px;max-width:100%}
+.slab .val-seg button{flex:1 1 auto;border:0;background:transparent;color:var(--muted);font:inherit;font-size:14px;padding:10px 16px;border-radius:9px;cursor:pointer;white-space:nowrap}
+.slab .val-seg button[aria-pressed=true]{background:#1c1c20;color:var(--text)}
+.slab .val button:focus-visible,.slab .val summary:focus-visible,.slab .val input:focus-visible,.slab .val select:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
+.slab .val-note{margin:8px 0 0;color:var(--muted);font-size:13px}
+.slab .val-hl{margin:10px 0 0;font-size:clamp(28px,6vw,40px);font-weight:500;letter-spacing:-.03em;line-height:1.1}
+.slab .val-roles{margin:22px 0 0;display:grid;gap:12px}
+.slab .val-role{display:grid;grid-template-columns:minmax(96px,210px) 1fr 52px;gap:12px;align-items:center;font-size:14px}
+.slab .val-role .bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+.slab .val-role .bar b{display:block;height:100%;background:var(--violet);border-radius:4px}
+.slab .val-role .p{text-align:right}
+.slab .val-role small{display:block;color:var(--muted);font-size:12px}
+.slab .val details{border-top:1px solid var(--line);margin-top:44px;padding-top:20px}
+.slab .val summary{cursor:pointer;font-size:20px;font-weight:600;letter-spacing:-.02em;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.slab .val summary::-webkit-details-marker{display:none}
+.slab .val summary::after{content:"+";color:var(--muted);font-weight:400;font-size:24px}
+.slab .val details[open]>summary::after{content:"\2212"}
+.slab .val-how{margin:16px 0 0;display:grid;gap:18px}
+.slab .val-how div{display:grid;gap:2px}
+.slab .val-how b{font-weight:500}
+.slab .val-how p{margin:0;color:var(--muted);font-size:13px}
+.slab .val-how .r{font-size:14px}
+.slab .val details details{margin-top:26px;border-top:0;padding-top:0}
+.slab .val details details summary{font-size:15px;font-weight:500}
+.slab .val-group{margin-top:22px}
+.slab .val-group h5{margin:0 0 4px;font-size:13px;font-weight:600}
+.slab .val-group .why{margin:0 0 10px;color:var(--muted);font-size:12px}
+.slab .val-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.slab .val-f label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+.slab .val-f input,.slab .val-f select{width:100%;height:38px;background:#0d0d0f;border:1px solid #232327;border-radius:9px;color:var(--text);font:inherit;font-size:14px;padding:0 10px}
+.slab .val-f input[type=range]{padding:0;accent-color:var(--violet)}
+.slab .val-f.bad input{border-color:var(--red)}
+.slab .val-check{display:flex;gap:10px;align-items:center;font-size:14px;margin-top:6px}
+.slab .val-check input{width:18px;height:18px;accent-color:var(--violet)}
+.slab .val-src{color:var(--muted);font-size:12px;margin-top:26px}
+.slab .val-warn{color:#fbbf24;font-size:12px;margin-top:6px}
+.slab .val-err{margin-top:20px;border:1px solid #4a1f1f;background:#1a0b0b;color:#fca5a5;border-radius:10px;padding:10px 14px;font-size:13px}
+.slab .val-busy{opacity:.55;transition:opacity .15s}
+@media (max-width:760px){.slab .val{padding:20px 16px 110px}.slab .val-role{grid-template-columns:1fr 52px}.slab .val-role .bar{grid-column:1/-1;grid-row:2}.slab .val-seg button{padding:10px 12px}}

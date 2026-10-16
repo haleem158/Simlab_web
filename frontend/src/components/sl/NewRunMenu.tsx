@@ -23,6 +23,12 @@ const ITEMS = [
     title: "Price impact",
     sub: "Demand and price response",
   },
+  {
+    href: "/valuation",
+    icon: "calc",
+    title: "Valuation",
+    sub: "What a token could be worth",
+  },
 ];
 
 export function NewRunMenu() {
