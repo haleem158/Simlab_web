@@ -9,6 +9,7 @@ const TABS = [
   { href: "/token-supply", icon: "coins", label: "Token supply" },
   { href: "/vesting", icon: "cal", label: "Vesting" },
   { href: "/token-impact", icon: "down", label: "Price impact" },
+  { href: "/valuation", icon: "calc", label: "Valuation" },
 ];
 
 /** Bottom navigation. Only visible at phone and tablet widths. */

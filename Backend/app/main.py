@@ -2,7 +2,7 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import token_supply, token_impact, vesting  # Add token_impact
+from app.routers import token_supply, token_impact, vesting, valuation  # Add token_impact
 
 # The interactive API docs are off by default. For local development set ENABLE_DOCS=1
 # and open /api/docs.
@@ -36,6 +36,7 @@ app.add_middleware(
 app.include_router(token_supply.router, prefix="/api/v1/token-supply", tags=["Token Supply"])
 app.include_router(token_impact.router, prefix="/api/v1/token-impact", tags=["Token Impact"])  # Add this
 app.include_router(vesting.router, prefix="/api/v1/vesting", tags=["Vesting"])
+app.include_router(valuation.router, prefix="/api/v1/valuation", tags=["Valuation"])
 
 @app.get("/")
 async def root():

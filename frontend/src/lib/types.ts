@@ -187,3 +187,42 @@ export interface VestingProfile {
   params: VestingParams;
   summary: any;
 }
+
+// ---- Valuation ----
+export interface ValuationMethod {
+  id: "network" | "cashflow" | "peers" | "prelaunch";
+  name: string;
+  why: string;
+  low: number;
+  mid: number;
+  high: number;
+}
+
+export interface ValuationRoleDiscount {
+  name: string;
+  allocation_pct: number;
+  average_wait_years: number;
+  discount: number;
+}
+
+export interface ValuationResponse {
+  success: boolean;
+  headline: {
+    low: number;
+    high: number;
+    spread_ratio: number;
+    agreement: "close" | "rough" | "wide";
+    locked_low: number | null;
+    locked_high: number | null;
+  };
+  methods: ValuationMethod[];
+  lockup: {
+    model: "ghaidarov" | "finnerty";
+    blended_discount: number;
+    other_model: "ghaidarov" | "finnerty";
+    other_model_blended_discount: number;
+    locked_share_pct: number;
+    roles: ValuationRoleDiscount[];
+    volatility_warning: boolean;
+  };
+}

@@ -3,7 +3,7 @@ import { moneyParts, pctDelta, priceParts, type KpiParts } from "./charts";
 
 /* Runs are kept in this browser only (localStorage). Nothing is sent to a server. */
 
-export type RunType = "supply" | "vesting" | "impact";
+export type RunType = "supply" | "vesting" | "impact" | "valuation";
 export type Tone = "g" | "r";
 
 export interface RunMetric {
@@ -50,6 +50,13 @@ export const RUN_META: Record<
     href: "/token-impact",
     icon: "down",
     color: "#5b35c9",
+  },
+  valuation: {
+    name: "Valuation",
+    model: "Scenario model",
+    href: "/valuation",
+    icon: "calc",
+    color: "#1f5f5b",
   },
 };
 
@@ -339,6 +346,61 @@ export function impactRecord(p: any, r: any): NewRun {
               : "On"
           : "Off",
       },
+    ],
+    params: p,
+  };
+}
+
+const usdText = (x: number) => (x >= 1 ? `$${x.toFixed(2)}` : `$${x.toFixed(3)}`);
+
+/** p = what the Valuation page needs to restore itself (answers, numbers, roles). r = the API response. */
+export function valuationRecord(p: any, r: any): NewRun {
+  const h = r.headline;
+  const L = r.lockup;
+  const mids: number[] = r.methods.map((m: any) => m.mid as number).sort((a: number, b: number) => a - b);
+  const hasLocks = h.locked_low != null && h.locked_high != null && L.roles.length > 0;
+  const agree =
+    h.agreement === "close"
+      ? "Methods agree closely"
+      : h.agreement === "rough"
+        ? "Methods roughly agree"
+        : "Methods disagree widely";
+  const f = p.f ?? {};
+  return {
+    type: "valuation",
+    headline: { label: "Token value, midpoint", parts: priceParts((h.low + h.high) / 2) },
+    delta: { text: `${usdText(h.low)} to ${usdText(h.high)}`, tone: "g" },
+    spark: mids.length > 1 ? mids : [mids[0] ?? 0, mids[0] ?? 0],
+    metrics: [
+      hasLocks
+        ? {
+            label: "Lock-up discount",
+            parts: { to: L.blended_discount * 100, dec: 0, pre: "", suf: "%" },
+            sub: `${Math.round(L.locked_share_pct)}% of supply locked`,
+          }
+        : { label: "Lock-up discount", parts: { to: 0, dec: 0, pre: "", suf: "%" }, sub: "No vesting roles" },
+      hasLocks
+        ? {
+            label: "Locked token value",
+            parts: priceParts((h.locked_low + h.locked_high) / 2),
+            sub: `${usdText(h.locked_low)} to ${usdText(h.locked_high)}`,
+          }
+        : { label: "Locked token value", parts: priceParts(0), sub: "Run Vesting first" },
+      {
+        label: "Methods spread",
+        parts: { to: Math.min(h.spread_ratio, 99), dec: 1, pre: "", suf: "x" },
+        sub: agree,
+      },
+      { label: "Methods used", parts: { to: r.methods.length, dec: 0, pre: "", suf: "" } },
+    ],
+    details: [
+      { label: "Value range", value: `${usdText(h.low)} to ${usdText(h.high)}` },
+      { label: "Network use", value: String(p.labels?.usage ?? "") },
+      { label: "Project risk", value: String(p.labels?.risk ?? "") },
+      { label: "Price swings", value: `${f.vol ?? ""}% a year (${p.labels?.swing ?? ""})` },
+      { label: "Markdown rate", value: `${f.rlo ?? ""}% to ${f.rhi ?? ""}%` },
+      { label: "Lock-up model", value: L.model === "finnerty" ? "Finnerty" : "Ghaidarov" },
+      { label: "Pre-launch scorecard", value: p.inc ? "On" : "Off" },
     ],
     params: p,
   };

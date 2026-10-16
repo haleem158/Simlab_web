@@ -99,6 +99,12 @@ class ApiClient {
     return response.data;
   }
 
+  // Valuation Endpoints
+  async runValuation(params: any) {
+    const response = await this.client.post("/api/v1/valuation/run", params);
+    return response.data;
+  }
+
   // Health check
   async healthCheck() {
     const response = await this.client.get("/health");
