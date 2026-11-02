@@ -7,6 +7,7 @@ from app.models.token_impact import (
     SampleCSVResponse
 )
 from app.services.token_impact_simulator import TokenImpactSimulator
+from app.services.interpretation import read_impact
 import pandas as pd
 from io import StringIO
 
@@ -41,7 +42,8 @@ async def simulate_token_impact(params: TokenImpactParams):
             data=results,
             summary=summary,
             metadata=metadata,
-            mc=mc
+            mc=mc,
+            reading=read_impact(params, results)
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

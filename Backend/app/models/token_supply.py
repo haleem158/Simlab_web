@@ -1,6 +1,7 @@
 # backend/app/models/token_supply.py
 from pydantic import BaseModel, Field, validator
 from typing import Optional, List, Literal
+from app.models.interpretation import Reading
 
 class TokenSupplyParams(BaseModel):
     """Parameters for token supply simulation"""
@@ -37,10 +38,22 @@ class TokenSupplyParams(BaseModel):
     burn_rate: float = Field(default=0.0, ge=0, le=1, description="Annual burn rate on non-staked supply")
     tx_activity_index: float = Field(default=1.0, ge=0, le=5, description="Transaction activity multiplier")
     
+    # Revenue-funded buyback and burn (tokens bought on the market at last month's price, then burned)
+    buyback_revenue_annual: float = Field(default=0.0, ge=0, le=1e12, description="Protocol revenue per year, in the same currency as price")
+    buyback_revenue_growth: float = Field(default=0.0, ge=-0.9, le=10, description="Annual growth of that revenue")
+    buyback_share: float = Field(default=1.0, ge=0, le=1, description="Share of revenue spent on buyback and burn")
+
     # Vesting parameters
     vesting_months: int = Field(default=0, ge=0, le=1200, description="Vesting duration in months")
     vesting_curve: Literal["linear", "exponential"] = Field(default="linear", description="Vesting curve type")
     
+    # Optional schedule from the Vesting module: cumulative tokens released to the market
+    # by the end of each month. When given, it replaces the single-curve vesting cap above.
+    unlock_schedule: Optional[List[float]] = Field(
+        default=None,
+        description="Cumulative tokens unlocked by end of each month, from the Vesting module",
+    )
+
     # Demand/Price parameters
     demand_index_base: float = Field(default=1.0, ge=0.001, le=100, description="Base demand index")
     demand_growth_rate: float = Field(default=0.02, ge=0, le=1, description="Annual demand growth rate")
@@ -58,6 +71,16 @@ class TokenSupplyParams(BaseModel):
     seed: Optional[int] = Field(default=None, ge=0, description="Random seed for reproducibility")
     stop_if_cap_reached: bool = Field(default=True, description="Stop simulation if cap is reached")
     
+    @validator('unlock_schedule')
+    def validate_unlock_schedule(cls, v):
+        if v is None:
+            return v
+        if len(v) == 0 or len(v) > 14400:
+            raise ValueError('unlock_schedule must have between 1 and 14400 monthly values')
+        if any(b < a - 1e-9 for a, b in zip(v, v[1:])) or v[0] < 0:
+            raise ValueError('unlock_schedule must be cumulative (never decrease) and not negative')
+        return v
+
     @validator('initial_supply')
     def validate_initial_supply(cls, v, values):
         if 'total_supply' in values and v > values['total_supply']:
@@ -78,6 +101,7 @@ class MonthlyData(BaseModel):
     staking_rewards: float
     treasury_issuance: float
     burned_tokens: float
+    buyback_burned: float = 0.0
     circulating: float
     staked_supply: float
     burned_cumulative: float
@@ -94,6 +118,7 @@ class TokenSupplyResponse(BaseModel):
     data: List[MonthlyData]
     summary: dict
     metadata: dict
+    reading: Optional[Reading] = None
 
 class MonteCarloResponse(BaseModel):
     """Response from Monte Carlo simulation"""

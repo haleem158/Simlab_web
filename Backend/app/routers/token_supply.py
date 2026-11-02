@@ -7,6 +7,7 @@ from app.models.token_supply import (
     PresetScenario
 )
 from app.services.token_supply_simulator import TokenSupplySimulator
+from app.services.interpretation import read_supply
 
 router = APIRouter()
 
@@ -41,7 +42,8 @@ async def simulate_token_supply(params: TokenSupplyParams):
             params=params,
             data=results,
             summary=summary,
-            metadata=metadata
+            metadata=metadata,
+            reading=read_supply(params, results)
         )
     
     except Exception as e:

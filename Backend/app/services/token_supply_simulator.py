@@ -47,6 +47,8 @@ class TokenSupplySimulator:
         locked = max(0.0, float(params.initial_locked))
         
         results = []
+        # Price at launch, used for month 1's buyback.
+        price_prev = float(params.price_scale) * float(params.demand_index_base) / max(1.0, circulating)
         
         for m in range(1, months + 1):
             year = (m - 1) // 12 + 1
@@ -63,11 +65,20 @@ class TokenSupplySimulator:
             staking_rate_t = min(1.0, max(0.0, stake_base + stake_growth * np.log1p(m / 12.0)))
             
             # Vesting unlock
-            unlocked_fraction = cls.vesting_unlocked_fraction(
-                m, params.vesting_months, params.vesting_curve
-            )
-            unlocked_tokens = total_supply * unlocked_fraction
-            circulating = min(circulating, unlocked_tokens)
+            if params.unlock_schedule:
+                # Real schedule from the Vesting module: each month's new unlocks join the float.
+                sched = params.unlock_schedule
+                cum_now = float(sched[min(m, len(sched)) - 1])
+                cum_prev = float(sched[min(m - 1, len(sched)) - 1]) if m > 1 else 0.0
+                circulating = min(total_supply, circulating + max(0.0, cum_now - cum_prev))
+            else:
+                unlocked_fraction = cls.vesting_unlocked_fraction(
+                    m, params.vesting_months, params.vesting_curve
+                )
+                # The starting float is already unlocked at launch, so the vesting
+                # cap can never push circulating supply below it.
+                unlocked_tokens = max(total_supply * unlocked_fraction, float(params.initial_supply))
+                circulating = min(circulating, unlocked_tokens)
             
             # Remaining cap
             remaining_cap = max(0.0, total_supply - (circulating + locked + burned))
@@ -99,6 +110,17 @@ class TokenSupplySimulator:
             burn_rate_monthly = 1 - (1 - float(params.burn_rate)) ** (1/12.0)
             burn_from_activity = non_staked * burn_rate_monthly * float(params.tx_activity_index)
             burned_tokens = min(non_staked, burn_from_activity)
+
+            # Revenue-funded buyback: spend revenue at last month's price, then burn what was bought.
+            buyback_burned = 0.0
+            if params.buyback_revenue_annual > 0 and params.buyback_share > 0:
+                rev_m = float(params.buyback_revenue_annual) / 12.0 * (
+                    (1 + float(params.buyback_revenue_growth)) ** ((m - 1) / 12.0)
+                )
+                spend = rev_m * float(params.buyback_share)
+                bought = spend / max(price_prev, 1e-12)
+                buyback_burned = max(0.0, min(bought, circulating + new_tokens - burned_tokens))
+                burned_tokens += buyback_burned
             
             # Update supplies
             # staking_rewards and treasury_issuance are the two halves of new_tokens,
@@ -113,6 +135,7 @@ class TokenSupplySimulator:
             demand_growth = float(params.demand_growth_rate)
             demand_index = demand_index_base * (1 + demand_growth) ** ((m - 1) / 12.0)
             price = float(params.price_scale) * demand_index / max(1.0, circulating)
+            price_prev = price
             
             results.append(MonthlyData(
                 month=int(m),
@@ -121,6 +144,7 @@ class TokenSupplySimulator:
                 staking_rewards=float(staking_rewards),
                 treasury_issuance=float(treasury_issuance),
                 burned_tokens=float(burned_tokens),
+                buyback_burned=float(buyback_burned),
                 circulating=float(circulating),
                 staked_supply=float(staked_supply),
                 burned_cumulative=float(burned),

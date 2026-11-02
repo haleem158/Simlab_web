@@ -5,6 +5,7 @@ from app.models.vesting import (
     VestingRole
 )
 from app.services.vesting_simulator import VestingSimulator
+from app.services.interpretation import read_vesting
 
 router = APIRouter()
 
@@ -55,7 +56,8 @@ async def simulate_vesting(params: VestingParams):
             params=params,
             data=results,
             summary=summary,
-            metadata=metadata
+            metadata=metadata,
+            reading=read_vesting(params, results)
         )
     
     except HTTPException:

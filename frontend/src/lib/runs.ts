@@ -22,6 +22,8 @@ export interface RunRecord {
   spark: number[];
   metrics: RunMetric[];
   details: { label: string; value: string }[];
+  /** One-line reading from the API (rules-based), shown on the share card. */
+  reading?: string;
   params: Record<string, unknown>;
 }
 export type NewRun = Omit<RunRecord, "id" | "ts">;
@@ -171,6 +173,7 @@ export function supplyRecord(p: any, r: { mc?: any; det?: any }): NewRun {
   const d = (fc / circ[0] - 1) * 100;
   const yr = +years.toFixed(1);
   return {
+    reading: (r.det?.reading ?? r.mc?.reading)?.headline,
     type: "supply",
     headline: { label: "Final circulating", parts: moneyParts(fc) },
     delta: { text: `${pctDelta(d)} vs. start`, tone: d >= 0 ? "g" : "r" },
@@ -224,6 +227,7 @@ export function vestingRecord(p: any, r: any): NewRun {
   const supply = num(p.total_supply) || 1;
   const roles: any[] = p.roles ?? [];
   return {
+    reading: (r.reading)?.headline,
     type: "vesting",
     headline: {
       label: "Circulating at end",
@@ -292,6 +296,7 @@ export function impactRecord(p: any, r: any): NewRun {
     (d[d.length - 1].effective_supply / d[0].effective_supply - 1) * 100;
   const dem = d[d.length - 1].demand_index / d[0].demand_index - 1;
   return {
+    reading: (r.reading)?.headline,
     type: "impact",
     headline: { label: "Final price", parts: priceParts(s.final_price) },
     delta: {
@@ -367,6 +372,7 @@ export function valuationRecord(p: any, r: any): NewRun {
         : "Methods disagree widely";
   const f = p.f ?? {};
   return {
+    reading: (r.reading)?.headline,
     type: "valuation",
     headline: { label: "Token value, midpoint", parts: priceParts((h.low + h.high) / 2) },
     delta: { text: `${usdText(h.low)} to ${usdText(h.high)}`, tone: "g" },

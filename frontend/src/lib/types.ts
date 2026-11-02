@@ -15,6 +15,9 @@ export interface TokenSupplyParams {
   staking_reward_share: number;
   burn_rate: number;
   tx_activity_index: number;
+  buyback_revenue_annual?: number;
+  buyback_revenue_growth?: number;
+  buyback_share?: number;
   vesting_months: number;
   vesting_curve: "linear" | "exponential";
   demand_index_base: number;
@@ -44,8 +47,33 @@ export interface MonthlyData {
   inflation_annual_equiv: number;
 }
 
+// ---- Reading (rules-based interpretation returned by the API) ----
+export type ReadingTone = "good" | "watch" | "risk" | "info";
+
+export interface ReadingSection {
+  key: "drivers" | "thresholds" | "timing" | "inputs";
+  title: string;
+  items: string[];
+}
+
+export interface ReadingInputFlag {
+  name: string;
+  value: string;
+  status: "set" | "default";
+}
+
+export interface Reading {
+  headline: string;
+  tone: ReadingTone;
+  sections: ReadingSection[];
+  inputs: ReadingInputFlag[];
+  next_test?: string | null;
+  caveats: string[];
+}
+
 export interface TokenSupplyResponse {
   success: boolean;
+  reading?: Reading | null;
   params: TokenSupplyParams;
   data: MonthlyData[];
   summary: {
@@ -122,6 +150,7 @@ export interface TokenImpactParams {
 
 export interface TokenImpactResponse {
   success: boolean;
+  reading?: Reading | null;
   params: TokenImpactParams;
   data: any[];
   summary: {
@@ -168,6 +197,7 @@ export interface MonthlyVestingData {
 
 export interface VestingResponse {
   success: boolean;
+  reading?: Reading | null;
   params: VestingParams;
   data: MonthlyVestingData[]; // ✅ Fixed: was "any"
   summary: {
@@ -207,6 +237,7 @@ export interface ValuationRoleDiscount {
 
 export interface ValuationResponse {
   success: boolean;
+  reading?: Reading | null;
   headline: {
     low: number;
     high: number;
