@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import apiClient from "@/lib/api";
 import { getRun, saveRun, useRuns, valuationRecord } from "@/lib/runs";
 import type { ValuationResponse } from "@/lib/types";
+import { ReadingPanel } from "@/components/sl/ReadingPanel";
 
 /* The three plain questions, mapped to the technical numbers behind them. */
 const USAGE = [
@@ -328,6 +329,8 @@ export default function ValuationPage() {
             )
           ) : null}
         </section>
+
+        <ReadingPanel reading={data?.reading} />
 
         <details>
           <summary>How we got this</summary>

@@ -13,6 +13,10 @@ declare global {
 
 const CONTRACT_ADDRESS = "0x8Bd60BD871b68F160694e6CeDf5014d6CBB85185";
 
+// The deployed contract still takes a fourth uint8 argument (formerly the survival score).
+// The score was removed, so a constant 0 is sent until the contract is redeployed.
+const RESERVED_UINT8 = 0;
+
 const ABI = [
   "function certify(bytes32 simulationHash, string projectName, string simulationType, uint8 survivalScore) external",
   "function verify(bytes32 simulationHash) external view returns (bool)",
@@ -32,7 +36,6 @@ export interface AttestationPayload {
   projectName: string;
   simulationType: SimulationType;
   inputs: Record<string, unknown>;
-  survivalScore: number;
 }
 
 export interface AttestationResult {
@@ -83,7 +86,6 @@ export function useAttestation() {
       const canonical = JSON.stringify({
         projectName: payload.projectName,
         simulationType: payload.simulationType,
-        survivalScore: payload.survivalScore,
         inputs: payload.inputs,
         timestamp: new Date().toISOString(),
       });
@@ -98,7 +100,7 @@ export function useAttestation() {
         simulationHash,
         payload.projectName,
         payload.simulationType,
-        payload.survivalScore,
+        RESERVED_UINT8,
       );
 
       // Wait for confirmation

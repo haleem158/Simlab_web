@@ -22,6 +22,7 @@ import {
   Seg,
   Toggle,
 } from "@/components/sl/kit";
+import { ReadingPanel } from "@/components/sl/ReadingPanel";
 import {
   axisFor,
   csvDownload,
@@ -598,6 +599,7 @@ export default function TokenImpactModel() {
                   }
                 />
               </ChartPanel>
+              <ReadingPanel reading={results?.reading} />
             </>
           ) : (
             <EmptyState

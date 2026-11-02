@@ -25,6 +25,7 @@ import {
   TextCell,
   Toggle,
 } from "@/components/sl/kit";
+import { ReadingPanel } from "@/components/sl/ReadingPanel";
 import {
   PALETTE,
   axisFor,
@@ -699,6 +700,7 @@ export default function VestingSimulator() {
                 />
               </ChartPanel>
             </div>
+            <ReadingPanel reading={results?.reading} />
           </>
         ) : (
           <div style={{ marginTop: 20 }}>

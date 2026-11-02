@@ -24,11 +24,9 @@ const LABELS: Record<AttestationStatus, string> = {
 export function CertifyPanel({
   simulationType,
   inputs,
-  survivalScore,
 }: {
   simulationType: SimulationType;
   inputs: Record<string, unknown>;
-  survivalScore: number;
 }) {
   const [projectName, setProjectName] = useState("My Project");
   const { certify, status, result, error, reset } = useAttestation();
@@ -45,7 +43,6 @@ export function CertifyPanel({
       projectName: projectName.trim() || "My Project",
       simulationType,
       inputs,
-      survivalScore,
     });
   };
 
@@ -72,13 +69,6 @@ export function CertifyPanel({
               maxLength={60}
             />
           </div>
-        </div>
-        <div className="certscore">
-          <span>Survival score</span>
-          <b>
-            {survivalScore}
-            <small> / 100</small>
-          </b>
         </div>
       </div>
       <button

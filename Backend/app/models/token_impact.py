@@ -1,6 +1,7 @@
 # backend/app/models/token_impact.py
 from pydantic import BaseModel, Field, validator
 from typing import List, Optional, Literal
+from app.models.interpretation import Reading
 
 class CSVRow(BaseModel):
     """Single row of CSV data"""
@@ -63,6 +64,7 @@ class TokenImpactResponse(BaseModel):
     summary: dict
     metadata: dict
     mc: Optional[List[dict]] = None
+    reading: Optional[Reading] = None
 
 class SampleCSVResponse(BaseModel):
     """Sample CSV data response"""

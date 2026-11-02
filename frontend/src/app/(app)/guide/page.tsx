@@ -109,9 +109,13 @@ export default function GuidePage() {
             <span>3</span>
             <h4>Run and read</h4>
             <p>
-              Press Run. Read the four cards at the top first, then the charts.
-              Change a number and run again to compare. On a phone, results open
-              on the Results tab.
+              Press Run. Read the four cards at the top first, then the charts,
+              then the Reading panel below them. The Reading says in plain words
+              what drives the result, where it tips over, and which numbers are
+              still at their defaults. It is calculated by rules, not written by
+              AI, so the same run gives the same reading. Use Copy as JSON to
+              hand it to a person or another tool. Change a number and run again
+              to compare. On a phone, results open on the Results tab.
             </p>
           </div>
         </div>
@@ -492,11 +496,7 @@ export default function GuidePage() {
           items={[
             {
               name: "What gets recorded",
-              what: "A fingerprint (hash) of your settings and results, together with the project name and the survival score. It proves later that these results existed and were not changed. The full numbers are not published.",
-            },
-            {
-              name: "Survival score",
-              what: "A rough 0 to 100 number the app calculates from the run’s burned and circulating supply. Treat it as a label, not a prediction.",
+              what: "A fingerprint (hash) of your settings and results, together with the project name. It proves later that these results existed and were not changed. The full numbers are not published.",
             },
             {
               name: "What you need",

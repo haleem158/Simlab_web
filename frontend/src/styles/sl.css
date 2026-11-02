@@ -433,18 +433,14 @@ html,body{background:#000}
 }
 
 /* ---- certify on Mantle (restored) ---- */
-.slab .cert .certrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:end;margin-top:18px}
-.slab .cert .certscore{height:44px;display:flex;align-items:center;gap:10px;padding:0 16px;border:1px solid #232327;border-radius:12px;background:#0a0a0c;font-size:12px;color:#8b8b95;white-space:nowrap}
-.slab .cert .certscore b{font-size:18px;font-weight:600;color:#f5f5f7}
-.slab .cert .certscore small{font-size:12px;font-weight:400;color:#8b8b95}
+.slab .cert .certrow{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:end;margin-top:18px}
 .slab .cert .certbtn{width:100%;height:50px;border-radius:14px;margin-top:16px;font-size:15px}
 .slab .cert .certbtn.ok{background:#34d399;color:#04140d}
 .slab .cert .certok{margin-top:16px;border:1px solid #14532d;background:#06170d;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px}
 .slab .cert .certok .t{font-size:13px;font-weight:600;color:#34d399}
 .slab .cert .certok .tx{font-size:12px;color:#86efac;word-break:break-all}
 .slab .cert .certok .btn{height:42px;border-radius:12px;font-size:13px}
-@media (max-width:1024px){.slab .cert .certrow{grid-template-columns:1fr}.slab .cert .certscore{justify-content:space-between}}
-
+@media (max-width:1024px){.slab .cert .certrow{grid-template-columns:1fr}}
 /* ---- help links ---- */
 .slab .helplink{display:inline-block;margin-top:8px;font-size:13px;color:var(--lav)}
 .slab .helplink:hover{text-decoration:underline}
@@ -565,3 +561,25 @@ html,body{background:#000}
 .slab .val-err{margin-top:20px;border:1px solid #4a1f1f;background:#1a0b0b;color:#fca5a5;border-radius:10px;padding:10px 14px;font-size:13px}
 .slab .val-busy{opacity:.55;transition:opacity .15s}
 @media (max-width:760px){.slab .val{padding:20px 16px 110px}.slab .val-role{grid-template-columns:1fr 52px}.slab .val-role .bar{grid-column:1/-1;grid-row:2}.slab .val-seg button{padding:10px 12px}}
+/* ---- reading panel ---- */
+.slab .reading .rdcopy{height:34px;font-size:12px;padding:0 14px;border-radius:10px;flex:none}
+.slab .reading .rdhead{display:flex;gap:14px;align-items:flex-start;margin-top:16px;padding:16px;border:1px solid #232327;border-radius:14px;background:#0a0a0c}
+.slab .reading .rdhead p{margin:0;font-size:15px;line-height:1.5;color:var(--text)}
+.slab .reading .rdtag{flex:none;font-size:11px;font-weight:600;padding:3px 9px;border-radius:6px;background:#221c40;color:var(--lav);margin-top:1px}
+.slab .reading .rdhead.good .rdtag{background:#06170d;color:var(--green)}
+.slab .reading .rdhead.watch .rdtag{background:#2a2108;color:#fbbf24}
+.slab .reading .rdhead.risk .rdtag{background:#2a0e0e;color:var(--red)}
+.slab .reading .rdgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:16px}
+.slab .reading .rdsec h4{margin:0 0 8px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.slab .reading .rdsec h4 small{font-size:11px;font-weight:400;text-transform:none;letter-spacing:0;margin-left:6px}
+.slab .reading .rdsec ul,.slab .reading .rdcav{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.slab .reading .rdsec li{font-size:13px;line-height:1.5;color:#d4d4da;padding-left:12px;border-left:2px solid #2a2a30}
+.slab .reading .rdinputs{margin-top:16px}
+.slab .reading .rdchips{display:flex;flex-wrap:wrap;gap:6px}
+.slab .reading .rdchip{font-size:11px;padding:4px 9px;border-radius:999px;border:1px solid #232327;color:#c9c9d1}
+.slab .reading .rdchip.default{border-style:dashed;color:#fbbf24;border-color:#4a3a10}
+.slab .reading .rdnext{margin-top:16px;font-size:13px;line-height:1.5;color:#d4d4da}
+.slab .reading .rdnext b{color:var(--lav);margin-right:6px}
+.slab .reading .rdcav{margin-top:16px;padding-top:14px;border-top:1px solid #17171a}
+.slab .reading .rdcav li{font-size:12px;line-height:1.5;color:var(--muted)}
+@media (max-width:1024px){.slab .reading .cph{gap:12px}.slab .reading .rdhead{flex-direction:column;gap:10px}}

@@ -304,13 +304,20 @@ export async function renderShareCard(run: NewRun, host: string, chart: ChartSpe
     }
   });
 
-  // settings + footer
+  // reading + settings + footer
   const line = run.details.slice(0, 5).map((d) => `${d.label} ${d.value}`).join("   ·   ");
-  c.font = `400 15px ${FONT}`;
-  let sl = line;
-  while (c.measureText(sl).width > SHARE_W - 112 && sl.length > 10) sl = sl.slice(0, -2);
-  if (sl !== line) sl += "…";
-  text(c, sl, 56, 818, 15, 400, "#8b8b95");
+  const trunc = (s: string, size: number, weight: number) => {
+    c.font = `${weight} ${size}px ${FONT}`;
+    let t = s;
+    while (c.measureText(t).width > SHARE_W - 112 && t.length > 10) t = t.slice(0, -2);
+    return t !== s ? t.trimEnd() + "…" : t;
+  };
+  if (run.reading) {
+    text(c, trunc(run.reading, 16, 500), 56, 800, 16, 500, "#d4d4da");
+    text(c, trunc(line, 14, 400), 56, 824, 14, 400, "#8b8b95");
+  } else {
+    text(c, trunc(line, 15, 400), 56, 818, 15, 400, "#8b8b95");
+  }
   c.strokeStyle = "#1a1a1e";
   c.lineWidth = 1.5;
   c.beginPath();

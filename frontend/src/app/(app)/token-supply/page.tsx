@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import apiClient from "@/lib/api";
-import { getRun, saveRun, supplyRecord, type NewRun } from "@/lib/runs";
+import { getRun, saveRun, supplyRecord, useRuns, type NewRun } from "@/lib/runs";
 import { ShareButton } from "@/components/sl/ShareButton";
 import type {
   MonteCarloResponse,
@@ -27,6 +27,7 @@ import {
   PctRange,
   Toggle,
 } from "@/components/sl/kit";
+import { ReadingPanel } from "@/components/sl/ReadingPanel";
 import {
   axisFor,
   compact,
@@ -58,6 +59,9 @@ const DEFAULTS: TokenSupplyParams = {
   staking_reward_share: 0.75,
   burn_rate: 0.02,
   tx_activity_index: 1.0,
+  buyback_revenue_annual: 0,
+  buyback_revenue_growth: 0,
+  buyback_share: 1,
   vesting_months: 0,
   vesting_curve: "linear",
   demand_index_base: 1.0,
@@ -74,6 +78,9 @@ const last = <T,>(a: T[]) => a[a.length - 1];
 
 export default function TokenSupplySimulator() {
   const [isLoading, setIsLoading] = useState(false);
+  const runs = useRuns();
+  const vestingRun = runs.find((x) => x.type === "vesting");
+  const [useVesting, setUseVesting] = useState(false);
   const [shareRun, setShareRun] = useState<NewRun | null>(null);
   const [results, setResults] = useState<TokenSupplyResponse | null>(null);
   const [mcResults, setMcResults] = useState<MonteCarloResponse | null>(null);
@@ -128,9 +135,18 @@ export default function TokenSupplySimulator() {
       total_supply: Number(data.total_supply),
     });
     try {
+      let payload: any = data;
+      if (useVesting && vestingRun) {
+        // Re-run the saved Vesting scenario and feed its unlocks into Supply.
+        const v = await apiClient.simulateVesting(vestingRun.params);
+        payload = {
+          ...data,
+          unlock_schedule: (v.data as any[]).map((d) => Number(d.total_unlocked)),
+        };
+      }
       if (data.stochastic && data.runs > 1) {
         const r = (await apiClient.monteCarloTokenSupply(
-          data,
+          payload,
         )) as MonteCarloResponse;
         setMcResults(r);
         const nr = supplyRecord(data, { mc: r });
@@ -139,7 +155,7 @@ export default function TokenSupplySimulator() {
         setTab("results");
       } else {
         const r = (await apiClient.simulateTokenSupply(
-          data,
+          payload,
         )) as TokenSupplyResponse;
         setResults(r);
         const nr = supplyRecord(data, { det: r });
@@ -222,14 +238,6 @@ export default function TokenSupplySimulator() {
 
   const certInputs = (mcResults ? mcResults.summary : results?.summary) as
     Record<string, unknown> | undefined;
-  const survival = view
-    ? Math.round(
-        Math.min(
-          100,
-          Math.max(0, 100 - (view.finals.burn / view.finals.circ) * 50),
-        ),
-      )
-    : 0;
   const supplyAxis = view
     ? axisFor(Math.max(...view.circ, ...view.stak, ...view.burn))
     : null;
@@ -303,6 +311,28 @@ export default function TokenSupplySimulator() {
             rules={{ required: true, min: 1, max: 200 }}
           />
 
+          <Group color="#60a5fa" title="Unlocks from Vesting">
+            <label style={{ display: "flex", gap: 10, alignItems: "flex-start", fontSize: 13 }}>
+              <input
+                type="checkbox"
+                checked={useVesting && !!vestingRun}
+                disabled={!vestingRun}
+                onChange={(e) => setUseVesting(e.target.checked)}
+                style={{ marginTop: 3 }}
+              />
+              <span>
+                {vestingRun
+                  ? "Use the schedule from my latest Vesting run"
+                  : "Run the Vesting page first to use its schedule here"}
+                <small style={{ display: "block", color: "var(--muted)", marginTop: 4 }}>
+                  Each month&apos;s unlocks join the circulating supply, then staking,
+                  burn and inflation act on it. Set the starting float to what is
+                  already unlocked at launch, so it is not counted twice.
+                </small>
+              </span>
+            </label>
+          </Group>
+
           <Group color="#38bdf8" title="Inflation parameters">
             <PctRange
               control={control}
@@ -339,8 +369,50 @@ export default function TokenSupplySimulator() {
               name="burn_rate"
               label="Annual burn rate"
               minPct={0}
-              maxPct={5}
-              hint="Typical: 0.1-3% annually"
+              maxPct={30}
+              hint="Typical: 0.1-3% annually. Buyback-funded burns can be higher"
+            />
+            <NumField
+              control={control}
+              name="buyback_revenue_annual"
+              label="Buyback revenue a year"
+              unit="$"
+              rules={{ min: 0 }}
+              hint="Revenue that funds buybacks, in the same currency as the price. 0 turns it off. Set the price scale to your real launch price first."
+            />
+            <PctRange
+              control={control}
+              name="buyback_share"
+              label="Share of revenue spent on buyback"
+              minPct={0}
+              maxPct={100}
+              hint="Tokens are bought at last month's price, then burned"
+            />
+            <PctRange
+              control={control}
+              name="buyback_revenue_growth"
+              label="Revenue growth a year"
+              minPct={0}
+              maxPct={200}
+            />
+          </Group>
+          <Group color="#fbbf24" title="Demand and price">
+            <PctRange
+              control={control}
+              name="demand_growth_rate"
+              label="Demand growth a year"
+              minPct={0}
+              maxPct={100}
+              stepPct={1}
+              digits={0}
+              hint="Growth in the demand index each year"
+            />
+            <NumField
+              control={control}
+              name="price_scale"
+              label="Price scale"
+              hint="Starting price = scale x demand index / circulating supply. Set it to your anchor price x initial supply"
+              rules={{ required: true, min: 0 }}
             />
           </Group>
           <Group color="#a78bfa" title="Monte Carlo simulation">
@@ -532,10 +604,10 @@ export default function TokenSupplySimulator() {
                   }
                 />
               </ChartPanel>
+              <ReadingPanel reading={results?.reading} />
               <CertifyPanel
                 simulationType="token-supply"
                 inputs={certInputs ?? {}}
-                survivalScore={survival}
               />
             </>
           ) : !isLoading ? (

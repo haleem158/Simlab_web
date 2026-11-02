@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field, validator
 from typing import List, Optional, Literal
+from app.models.interpretation import Reading
 
 class VestingRole(BaseModel):
     """Configuration for a single vesting role"""
@@ -54,6 +55,7 @@ class VestingResponse(BaseModel):
     data: List[MonthlyVestingData]
     summary: dict
     metadata: dict
+    reading: Optional[Reading] = None
 
 class VestingProfile(BaseModel):
     """Saved vesting profile"""

@@ -2,6 +2,8 @@ from typing import List, Literal, Optional
 
 from pydantic import BaseModel, Field, model_validator
 
+from app.models.interpretation import Reading
+
 ReleaseFrequency = Literal["biweekly", "monthly", "quarterly"]
 LockupModel = Literal["ghaidarov", "finnerty"]
 
@@ -147,3 +149,4 @@ class ValuationResponse(BaseModel):
     headline: Headline
     methods: List[MethodResult]
     lockup: LockupResult
+    reading: Optional[Reading] = None
